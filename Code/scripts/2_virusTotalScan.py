@@ -2,6 +2,13 @@ import sys
 import requests
 import time
 import json
+import io
+
+# Force stdout and stderr to use UTF-8
+sys.stdout = io.TextIOWrapper(
+    sys.stdout.buffer, encoding="utf-8", errors="replace")
+sys.stderr = io.TextIOWrapper(
+    sys.stderr.buffer, encoding="utf-8", errors="replace")
 
 
 def main():

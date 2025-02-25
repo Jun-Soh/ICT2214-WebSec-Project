@@ -2,7 +2,6 @@ import subprocess
 import html
 import sys
 import os
-import json
 
 
 def main():
@@ -26,26 +25,27 @@ def run_python_scripts(user_input):
     scripts = []
     domain_list = []
     results = []
-    
+
     for file in os.listdir(scripts_dir):
         if file.endswith(".py"):
             scripts.append(file)
 
     output, error = run_script("genDomain.py", user_input)
     d_results = f"<h2>Domains Generated</h2><pre>{output}</pre><pre style='color:red;'>{error}</pre>"
-        
+
     lines = output.strip().split('\n')
     for line in lines:
         if line.startswith("Domain:"):
             domain_name = line.split(',')[0].split(':')[1].strip()
             domain_list.append(domain_name)
-    
+
     for domain in domain_list:
         for script in scripts:
             script_path = os.path.join(scripts_dir, script)
             print(f"Running: {script} with domain - {domain}")
             output, error = run_script(script_path, domain)
-            results.append(f"<div class='column'><h2>{script} - {domain}</h2><pre>{output}</pre><pre style='color:red;'>{error}</pre></div>")
+            results.append(
+                f"<div class='column'><h2>{script} - {domain}</h2><pre>{output}</pre><pre style='color:red;'>{error}</pre></div>")
 
     html_content = """
                     <html>
@@ -71,9 +71,8 @@ def run_python_scripts(user_input):
                             </style>
                         </head>
                     """
-    
-                    
-    html_content +=  f"""
+
+    html_content += f"""
                         <body>
                             <h1>Python Script Execution Results</h1>
                             <div class='row'>
@@ -85,7 +84,7 @@ def run_python_scripts(user_input):
                         </body>
                     </html>
                     """
-    
+
     return html_content
 
 
@@ -96,7 +95,7 @@ def run_script(script_path, arg=None):
         args = [sys.executable, script_path]
         if arg:
             args.append(arg)
-        
+
         process = subprocess.run(
             args,
             capture_output=True,
@@ -107,6 +106,8 @@ def run_script(script_path, arg=None):
 
         output = process.stdout
         error = process.stderr
+
+        print(f"Output: {output}\nError: {error}")
 
     except subprocess.TimeoutExpired:
         error = f"Timeout: {script_path} took too long to execute."
