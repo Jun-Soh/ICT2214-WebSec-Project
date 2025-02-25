@@ -44,7 +44,7 @@ def run_python_scripts(user_input):
         for script in scripts:
             script_path = os.path.join(scripts_dir, script)
             print(f"Running: {script} with domain - {domain}")
-            output, error = run_script(script_path, user_input)
+            output, error = run_script(script_path, domain)
             results.append(f"<div class='column'><h2>{script} - {domain}</h2><pre>{output}</pre><pre style='color:red;'>{error}</pre></div>")
 
     html_content = """
