@@ -7,7 +7,6 @@ from skimage.metrics import structural_similarity as ssim
 from PIL import Image, ImageDraw, ImageFont
 
 
-# Reconfigure stdout to UTF-8 encoding (this is important for capturing Unicode characters)
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 
@@ -113,29 +112,12 @@ class Domain:
         return sorted_homoglyphs[:n]
 
 
-def main():
-    if len(sys.argv) < 2:
-        print("Usage: python3 script.py <domain_name>")
-        return
-
-    domain_name = sys.argv[1]
-    print(f"Generating homoglyphs for domain: {domain_name}")
-
-    # Create a Domain object
+def genDomain(domain_name):
     domain = Domain(domain_name)
-
-    # Generate all unique homoglyph versions of the domain name
     domain.generate_homoglyph()
 
-    print(len(domain.homoglyph_versions),
-          "unique homoglyph versions generated.")
+    # print(len(domain.homoglyph_versions),
+    #       "unique homoglyph versions generated.")
 
-    # Get the top 10 homoglyph versions
     top_homoglyphs = domain.get_top_homoglyphs(n=10)
-    print("\nTop 10 Homoglyph Versions:")
-    for homoglyph, similarity in top_homoglyphs:
-        print(f"Domain: {homoglyph}, Similarity Score: {similarity:.2f}")
-
-
-if __name__ == "__main__":
-    main()
+    return top_homoglyphs
