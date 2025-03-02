@@ -44,6 +44,7 @@ def main():
                                     {vtTable}
                                 </div>
                             </div>
+                        <hr>
                         """
 
     write_output(domainName, htmlBody)
