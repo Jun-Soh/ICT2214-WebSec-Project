@@ -124,7 +124,7 @@ class Domain:
         """
         sorted_homoglyphs = sorted(
             self.homoglyph_versions.items(), key=lambda x: x[1], reverse=True)
-        return sorted_homoglyphs
+        return sorted_homoglyphs[:n]
 
 
 def genDomain(domain_name):
@@ -134,5 +134,5 @@ def genDomain(domain_name):
     # print(len(domain.homoglyph_versions),
     #       "unique homoglyph versions generated.")
 
-    top_homoglyphs = domain.get_top_homoglyphs(n=15)
+    top_homoglyphs = domain.get_top_homoglyphs(n=10)
     return top_homoglyphs
