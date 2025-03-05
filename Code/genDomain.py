@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 from skimage.metrics import structural_similarity as ssim
 from PIL import Image, ImageDraw, ImageFont
+import tldextract
 
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
@@ -21,14 +22,26 @@ class Domain:
             image_size (tuple): Size of the output image (width, height).
             font_size (int): Font size for the text.
         """
-        self.domain_name = domain_name
+        # Extract the domain name from the URL
+        ext = tldextract.extract(domain_name)
+
+        # Combine the subdomain and domain
+        if ext.subdomain == "":
+            self.sub_domain_and_domain = ext.domain
+        else:
+            self.sub_domain_and_domain = ext.subdomain + "." + ext.domain
+
+        self.suffix = ext.suffix
+        self.original_domain_name = domain_name
+
         self.font_path = font_path
         self.image_size = image_size
         self.font_size = font_size
         self.homoglyph_versions = dict()
 
         # Render the original domain name as an image
-        self.original_image = self.render_text_as_image(domain_name)
+        self.original_image = self.render_text_as_image(
+            self.original_domain_name)
 
     def render_text_as_image(self, text):
         """
@@ -90,22 +103,20 @@ class Domain:
         Returns:
             str: A unique homoglyph version of the domain.
         """
-        stop_index = self.domain_name.find(".") # returns -1 if not found which is fine
-        if stop_index == -1:
-            stop_index = len(self.domain_name)
-        
-        for i in range(stop_index):
-            char_to_replace = self.domain_name[i]
+        for i in range(len(self.sub_domain_and_domain)):
+            char_to_replace = self.sub_domain_and_domain[i]
             homoglyphs_list = hg.Homoglyphs().get_combinations(char_to_replace)
 
             if homoglyphs_list:
-                new_domains = [self.domain_name[:i] + homoglyph_char +
-                               self.domain_name[i + 1:] for homoglyph_char in homoglyphs_list]
+                new_domains = [self.sub_domain_and_domain[:i] + homoglyph_char +
+                               self.sub_domain_and_domain[i + 1:] for homoglyph_char in homoglyphs_list]
 
                 for new_domain in new_domains:
-                    if new_domain not in self.homoglyph_versions and new_domain != self.domain_name:
-                        self.homoglyph_versions[new_domain] = self.compare_images(
-                            self.render_text_as_image(new_domain))
+                    new_domain_name = new_domain + "." + self.suffix
+
+                    if new_domain_name not in self.homoglyph_versions and new_domain_name != self.original_domain_name:
+                        self.homoglyph_versions[new_domain_name] = self.compare_images(
+                            self.render_text_as_image(new_domain_name))
 
     def get_top_homoglyphs(self, n=10):
         """
@@ -113,7 +124,7 @@ class Domain:
         """
         sorted_homoglyphs = sorted(
             self.homoglyph_versions.items(), key=lambda x: x[1], reverse=True)
-        return sorted_homoglyphs[:n]
+        return sorted_homoglyphs
 
 
 def genDomain(domain_name):
@@ -123,5 +134,5 @@ def genDomain(domain_name):
     # print(len(domain.homoglyph_versions),
     #       "unique homoglyph versions generated.")
 
-    top_homoglyphs = domain.get_top_homoglyphs(n=10)
+    top_homoglyphs = domain.get_top_homoglyphs(n=15)
     return top_homoglyphs
