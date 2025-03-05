@@ -90,7 +90,11 @@ class Domain:
         Returns:
             str: A unique homoglyph version of the domain.
         """
-        for i in range(len(self.domain_name)):
+        stop_index = self.domain_name.find(".") # returns -1 if not found which is fine
+        if stop_index == -1:
+            stop_index = len(self.domain_name)
+        
+        for i in range(stop_index):
             char_to_replace = self.domain_name[i]
             homoglyphs_list = hg.Homoglyphs().get_combinations(char_to_replace)
 
