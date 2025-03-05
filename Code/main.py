@@ -25,8 +25,6 @@ def main():
                             </div>
                         <hr>"""
 
-
-    
     for domain, score in domainsGenerated:
         print("Scanning domain: ", domain)
 
@@ -116,6 +114,7 @@ def genPayloadTable(domainName):
 
     return payloadHTML
 
+
 def genWhoisTable(domainName):
     print(f"Querying whois information for {domainName}...")
     whoisHTML = f"""<h2>Whois information for {domainName}</h2>
@@ -124,16 +123,21 @@ def genWhoisTable(domainName):
                             <th>Creation Date</th>
                             <th>Expiration Date</th>
                         </tr>"""
-    
+
     whois_info = query_whois(domainName)
 
     if whois_info:
-        creation_date = whois_info.creation_date
-        expiration_date = whois_info.expiration_date
+        if isinstance(whois_info.creation_date, list):
+            creation_date_utc = whois_info.creation_date[1].strftime(
+                "%Y-%m-%d %H:%M:%S %Z")
+
+        if isinstance(whois_info.expiration_date, list):
+            expiration_date_utc = whois_info.creation_date[1].strftime(
+                "%Y-%m-%d %H:%M:%S %Z")
 
         whoisHTML += f"""<tr>
-                            <td>{creation_date}</td>
-                            <td>{expiration_date}</td>
+                            <td>{creation_date_utc}</td>
+                            <td>{expiration_date_utc}</td>
                         </tr>"""
     else:
         whoisHTML = f"""<h2>Whois information for {domainName}</h2>
@@ -141,7 +145,7 @@ def genWhoisTable(domainName):
                             <tr>
                                 <th>Domain is no longer in use</th>
                             </tr>"""
-    
+
     whoisHTML += "</table>"
     return whoisHTML
 
