@@ -2,6 +2,8 @@ from genDomain import genDomain
 from ipdb_scanner import check_ipdb_reputation, get_domain_ip, calculate_ipdb_score
 from vt_scanner import scan_url_vt, process_results, retrieve_vt_score
 from urlscanio_scanner import submit_url_scan, get_scan_results, analyze_results
+from whois_info import query_whois, check_a_records
+from payload_analysis import payload_scan
 import time
 
 
@@ -23,35 +25,125 @@ def main():
                             </div>
                         <hr>"""
 
-    for domain, score in domainsGenerated:
-        ipscansTable = genIPScanTable(domain)
-        vtTable = genVTTable(domain)
-        abuseIPDBTable = genAbuseIPDBTable(domain)
 
-        htmlBody += f"""    <div class="row">
-                                <div class="column">
-                                    <div class="nested-container">
-                                        <div class="nested-item">
-                                            {ipscansTable}
+    
+    for domain, score in domainsGenerated:
+        print("Scanning domain: ", domain)
+
+        # Check if domain is alive else don't scan it
+        if check_a_records(domain):
+            whoisTable = genWhoisTable(domain)
+            ipscansTable = genIPScanTable(domain)
+            vtTable = genVTTable(domain)
+            abuseIPDBTable = genAbuseIPDBTable(domain)
+            payloadTable = genPayloadTable(domain)
+
+            htmlBody += f"""    <div class="row">
+                                    <div class="column">
+                                        <div class="nested-container">
+                                            <div class="nested-item">
+                                                {whoisTable}
+                                            </div>
+                                            <div class="nested-item">
+                                                {ipscansTable}
+                                            </div>
+                                            <div class="nested-item">
+                                                {abuseIPDBTable}
+                                            </div>
                                         </div>
-                                        <div class="nested-item">
-                                            {abuseIPDBTable}
+                                    </div>
+
+                                    <div class="column">
+                                        <div class="nested-container">
+                                            <div class="nested-item">
+                                                {vtTable}
+                                            </div>
+                                            <div class="nested-item">
+                                                {payloadTable}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-
-                                <div class="column">
-                                    {vtTable}
-                                </div>
-                            </div>
-                        <hr>
-                        """
+                            <hr>
+                            """
 
     write_output(domainName, htmlBody)
 
 
 def getDomainName():
-    return input("Enter target domain to enumerate: ")
+    return input("Enter target domain to enumerate (e.g. apple.com, google.com): ")
+
+
+def genPayloadTable(domainName):
+    print(f"Performing payload analysis for files on {domainName}...")
+    payloadHTML = f"""<h2>Payload analysis for files on {domainName}</h2>
+                        <table class="table table-striped table-bordered table-dark">
+                            <tr>
+                                <th>File Name</th>
+                                <th>Network Connections</th>
+                                <th>Verdict</th>
+                                <th>AV Detection</th>
+                                <th>File Type</th>
+                                <th>Malware Behavior</th>
+                                <th>Signature Analysis</th>
+                            </tr>"""
+
+    asciiDomain = domainName.encode('idna').decode('utf-8')
+    URL = f"https://{asciiDomain}"
+    analysisResults = payload_scan(URL)
+
+    if analysisResults:
+        for result in analysisResults:
+            payloadHTML += f"""<tr>
+                                    <td>{result[0]}</td>
+                                    <td>{result[1]}</td>
+                                    <td>{result[2]}</td>
+                                    <td>{result[3]}</td>
+                                    <td>{result[4]}</td>
+                                    <td>{result[5]}</td>
+                                    <td>{result[6]}</td>
+                                </tr>"""
+
+        payloadHTML += "</table>"
+
+    else:
+        payloadHTML = f"""<h2>Payload analysis for files on {domainName}</h2>
+                            <table class="table table-striped table-bordered table-dark">
+                                <tr>
+                                    <th>No files found</th>
+                                </tr>
+                            </table>"""
+
+    return payloadHTML
+
+def genWhoisTable(domainName):
+    print(f"Querying whois information for {domainName}...")
+    whoisHTML = f"""<h2>Whois information for {domainName}</h2>
+                    <table class="table table-striped table-bordered table-dark">
+                        <tr>
+                            <th>Creation Date</th>
+                            <th>Expiration Date</th>
+                        </tr>"""
+    
+    whois_info = query_whois(domainName)
+
+    if whois_info:
+        creation_date = whois_info.creation_date
+        expiration_date = whois_info.expiration_date
+
+        whoisHTML += f"""<tr>
+                            <td>{creation_date}</td>
+                            <td>{expiration_date}</td>
+                        </tr>"""
+    else:
+        whoisHTML = f"""<h2>Whois information for {domainName}</h2>
+                        <table class="table table-striped table-bordered table-dark">
+                            <tr>
+                                <th>Domain is no longer in use</th>
+                            </tr>"""
+    
+    whoisHTML += "</table>"
+    return whoisHTML
 
 
 def genDomainTable(domainName):
