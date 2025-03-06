@@ -5,22 +5,21 @@ import dns.resolver
 def check_a_records(domain):
     try:
         answers = dns.resolver.resolve(domain, 'A')
-        print(f"A records for {domain}:")
-        for rdata in answers:
-            print(rdata.address)
-        return True
+        ip_addresses = [rdata.address for rdata in answers]  # List comprehension to extract IPs
+        print(f"A records for {domain}: {', '.join(ip_addresses)}")
+        return ip_addresses
     except dns.resolver.NoAnswer:
         print(f"No A records found for {domain}.")
-        return False
+        return None
     except dns.resolver.NXDOMAIN:
         print(f"Domain {domain} does not exist.")
-        return False
+        return None
     except dns.resolver.Timeout:
         print(f"DNS query timed out for {domain}.")
-        return False
+        return None
     except Exception as e:
         print(f"An error occurred: {e}")
-        return False
+        return None
 
 
 def query_whois(domain):

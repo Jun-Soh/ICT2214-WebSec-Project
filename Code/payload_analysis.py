@@ -143,8 +143,8 @@ def payload_scan(URL):
             if ha_job_id:
                 print("⏳ Waiting for Hybrid Analysis report...")
                 time.sleep(20)  # Allow some time for analysis
-                ha_file_report = get_hybrid_analysis_report(ha_job_id, file_name)
-                results.append(print_hybrid_analysis_report(ha_file_report))
+                ha_file_report = get_hybrid_analysis_report(ha_job_id)
+                results.append(print_hybrid_analysis_report(ha_file_report, file_name))
 
             # Delete the file after submission
             os.remove(file_name)

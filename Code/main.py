@@ -28,8 +28,9 @@ def main():
     for domain, score in domainsGenerated:
         print("Scanning domain: ", domain)
 
+        
         # Check if domain is alive else don't scan it
-        if check_a_records(domain):
+        if check_a_records(domain) is not None:
             whoisTable = genWhoisTable(domain)
             ipscansTable = genIPScanTable(domain)
             vtTable = genVTTable(domain)
@@ -87,7 +88,7 @@ def genPayloadTable(domainName):
                             </tr>"""
 
     asciiDomain = domainName.encode('idna').decode('utf-8')
-    URL = f"https://{asciiDomain}"
+    URL = f"http://{asciiDomain}"
     analysisResults = payload_scan(URL)
 
     if analysisResults:
@@ -127,12 +128,10 @@ def genWhoisTable(domainName):
     whois_info = query_whois(domainName)
 
     if whois_info:
-        if isinstance(whois_info.creation_date, list):
-            creation_date_utc = whois_info.creation_date[1].strftime(
+        creation_date_utc = whois_info.creation_date.strftime(
                 "%Y-%m-%d %H:%M:%S %Z")
 
-        if isinstance(whois_info.expiration_date, list):
-            expiration_date_utc = whois_info.creation_date[1].strftime(
+        expiration_date_utc = whois_info.creation_date.strftime(
                 "%Y-%m-%d %H:%M:%S %Z")
 
         whoisHTML += f"""<tr>
@@ -181,7 +180,7 @@ def genIPScanTable(domainName):
                             <th>Abuse Score</th>
                         </tr>"""
 
-    ip_list = get_domain_ip(domainName)
+    ip_list = check_a_records(domainName)
     ipdb_result = check_ipdb_reputation(ip_list)
     ipdb_score_percentage = calculate_ipdb_score(ipdb_result)
 
