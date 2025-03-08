@@ -34,7 +34,7 @@ def main():
             whoisTable = genWhoisTable(domain)
             ipscansTable = genIPScanTable(domain)
             vtTable = genVTTable(domain)
-            abuseIPDBTable = genAbuseIPDBTable(domain)
+            urlScanIOTable = genURLScanIOTable(domain)
             payloadTable = genPayloadTable(domain)
 
             htmlBody += f"""    <div class="row">
@@ -47,7 +47,7 @@ def main():
                                                 {ipscansTable}
                                             </div>
                                             <div class="nested-item">
-                                                {abuseIPDBTable}
+                                                {urlScanIOTable}
                                             </div>
                                         </div>
                                     </div>
@@ -237,9 +237,9 @@ def genVTTable(domainName):
     return vtHTML
 
 
-def genAbuseIPDBTable(domainName):
-    print(f"Scanning AbuseIPDB for {domainName}...")
-    ipdbHTML = f"""<h2>AbuseIPDB Results for {domainName}</h2>
+def genURLScanIOTable(domainName):
+    print(f"Scanning URLScan.io for {domainName}...")
+    ipdbHTML = f"""<h2>URLScan.io Results for {domainName}</h2>
                     <table class="table table-striped table-bordered table-dark">
                         <tr>
                             <th>Domain Score</th>
@@ -262,7 +262,7 @@ def genAbuseIPDBTable(domainName):
                         </tr>"""
 
     except KeyError as e:
-        ipdbHTML = f"""<h2>AbuseIPDB Results for {domainName}</h2>
+        ipdbHTML = f"""<h2>URLScan.io Results for {domainName}</h2>
                         <table class="table table-striped table-bordered table-dark">
                             <tr>
                                 <th>Domain has not been reported</th>
