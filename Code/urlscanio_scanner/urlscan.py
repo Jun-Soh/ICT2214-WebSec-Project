@@ -1,10 +1,11 @@
 import requests
 import time
 
-API_KEY = "f3de4233-95c1-4a8c-a1d8-67c13bd20532"
+API_KEY = 'Insert API Key here'
 
 URLSCAN_SUBMIT_URL = "https://urlscan.io/api/v1/scan/"
 URLSCAN_RESULT_URL = "https://urlscan.io/api/v1/result/"
+
 
 def submit_url_scan(url_to_scan, visibility="public"):
     """
@@ -18,19 +19,20 @@ def submit_url_scan(url_to_scan, visibility="public"):
         "API-Key": API_KEY,
         "Content-Type": "application/json"
     }
-    
+
     data = {
         "url": url_to_scan,
         "visibility": visibility
     }
 
     response = requests.post(URLSCAN_SUBMIT_URL, headers=headers, json=data)
-    
+
     if response.status_code == 200:
         result = response.json()
         return result.get("uuid")
     else:
         return {"error": f"Error submitting URL: {response.json()}"}
+
 
 def get_scan_results(uuid):
     """
@@ -41,11 +43,12 @@ def get_scan_results(uuid):
     """
     url = f"{URLSCAN_RESULT_URL}{uuid}/"
     response = requests.get(url)
-    
+
     if response.status_code == 200:
         return response.json()
     else:
         return {"error": f"Error fetching results: {response.json()}"}
+
 
 def analyze_results(scan_data):
     """
@@ -58,10 +61,8 @@ def analyze_results(scan_data):
         return {"error": "No valid scan data to analyze."}
 
     verdicts = scan_data.get("verdicts", {}).get("overall", {})
-    
+
     return {
         "score": verdicts.get("score", "N/A"),
         "malicious": verdicts.get("malicious", False)
     }
-
-

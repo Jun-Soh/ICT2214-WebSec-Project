@@ -4,7 +4,8 @@ from vt_scanner import scan_url_vt, process_results, retrieve_vt_score
 from urlscanio_scanner import submit_url_scan, get_scan_results, analyze_results
 from whois_info import query_whois, check_a_records
 from payload_analysis import payload_scan
-import time, datetime
+import time
+import datetime
 
 
 def main():
@@ -30,8 +31,6 @@ def main():
     for domain, score in domainsGenerated:
         print("Scanning domain: ", domain)
 
-        
-        # Check if domain is alive else don't scan it
         if check_a_records(domain) is not None:
             whoisTable = genWhoisTable(domain)
             ipscansTable = genIPScanTable(domain)
@@ -136,10 +135,10 @@ def genWhoisTable(domainName):
 
     if whois_info:
         creation_date_utc = whois_info.creation_date.strftime(
-                "%Y-%m-%d %H:%M:%S %Z")
+            "%Y-%m-%d %H:%M:%S %Z")
 
         expiration_date_utc = whois_info.creation_date.strftime(
-                "%Y-%m-%d %H:%M:%S %Z")
+            "%Y-%m-%d %H:%M:%S %Z")
 
         whoisHTML += f"""<tr>
                             <td>{creation_date_utc}</td>

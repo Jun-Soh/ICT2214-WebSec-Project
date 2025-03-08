@@ -1,7 +1,7 @@
 import requests
 import time
 
-API_KEY = "1dab91315611bb604dfdf7a3020923bc26a71e2fef1675feb274070f5f16f0ee"  
+API_KEY = 'Insert API Key here'
 VT_SUBMIT_URL = "https://www.virustotal.com/api/v3/urls"
 VT_REPORT_URL = "https://www.virustotal.com/api/v3/analyses/"
 
@@ -21,8 +21,6 @@ def scan_url_vt(url_to_scan):
     }
 
     data = {"url": url_to_scan}
-
-    # Step 1: Submit the URL for scanning
     response = requests.post(VT_SUBMIT_URL, headers=headers, data=data)
 
     if response.status_code != 200:
@@ -35,9 +33,8 @@ def scan_url_vt(url_to_scan):
         return {"error": "Failed to get analysis ID from response"}
 
     print(f"URL {url_to_scan} submitted successfully. Analysis ID: {analysis_id}")
-
-    # Step 2: Retrieve scan results
-    time.sleep(15)  # Wait for results to be processed, too short results in "queued" query status
+    # Wait for results to be processed, too short results in "queued" query status
+    time.sleep(15)
 
     report_url = f"{VT_REPORT_URL}{analysis_id}"
     report_response = requests.get(report_url, headers=headers)
@@ -47,6 +44,7 @@ def scan_url_vt(url_to_scan):
 
     return report_response.json()  # Return the scan report
 
+
 def process_results(report):
     engine_results = {}
     engine_results = report["data"]["attributes"]["results"]
@@ -54,6 +52,7 @@ def process_results(report):
         category = engine_data.get("category")
         engine_results[engine_name] = category
     return engine_results
+
 
 def retrieve_vt_score(report):
     stats = report["data"]["attributes"]["stats"]

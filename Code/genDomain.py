@@ -22,10 +22,8 @@ class Domain:
             image_size (tuple): Size of the output image (width, height).
             font_size (int): Font size for the text.
         """
-        # Extract the domain name from the URL
         ext = tldextract.extract(domain_name)
 
-        # Combine the subdomain and domain
         if ext.subdomain == "":
             self.sub_domain_and_domain = ext.domain
         else:
@@ -39,7 +37,6 @@ class Domain:
         self.font_size = font_size
         self.homoglyph_versions = dict()
 
-        # Render the original domain name as an image
         self.original_image = self.render_text_as_image(
             self.original_domain_name)
 
@@ -53,28 +50,21 @@ class Domain:
         Returns:
             np.array: Image of the rendered text as a NumPy array.
         """
-        # Create a blank white image
         img = Image.new("RGB", self.image_size, "white")
         draw = ImageDraw.Draw(img)
 
-        # Load the font
         try:
             font = ImageFont.truetype(self.font_path, self.font_size)
         except:
             raise Exception(f"Font file not found: {self.font_path}")
 
-        # Get text bounding box and calculate center position
-        # (left, top, right, bottom)
         text_bbox = draw.textbbox((0, 0), text, font=font)
         text_width = text_bbox[2] - text_bbox[0]
         text_height = text_bbox[3] - text_bbox[1]
         position = ((self.image_size[0] - text_width) //
                     2, (self.image_size[1] - text_height) // 2)
 
-        # Draw the text
         draw.text(position, text, fill="black", font=font)
-
-        # Convert the PIL image to a NumPy array
         return np.array(img)
 
     def compare_images(self, homoglyph_image):
@@ -88,21 +78,13 @@ class Domain:
         Returns:
             float: Similarity score (1.0 = identical, 0.0 = completely different).
         """
-        # Convert images to grayscale
         gray1 = cv2.cvtColor(self.original_image, cv2.COLOR_RGB2GRAY)
         gray2 = cv2.cvtColor(homoglyph_image, cv2.COLOR_RGB2GRAY)
 
-        # Compute SSIM between the two images
         score, _ = ssim(gray1, gray2, full=True)
         return score
 
     def generate_homoglyph(self):
-        """
-        Generate a homoglyph version of the domain, ensuring no duplicates.
-
-        Returns:
-            str: A unique homoglyph version of the domain.
-        """
         for i in range(len(self.sub_domain_and_domain)):
             char_to_replace = self.sub_domain_and_domain[i]
             homoglyphs_list = hg.Homoglyphs().get_combinations(char_to_replace)
@@ -119,9 +101,6 @@ class Domain:
                             self.render_text_as_image(new_domain_name))
 
     def get_top_homoglyphs(self, n=10):
-        """
-        Get the top n homoglyph versions based on similarity score.
-        """
         sorted_homoglyphs = sorted(
             self.homoglyph_versions.items(), key=lambda x: x[1], reverse=True)
         return sorted_homoglyphs[:n]
@@ -130,9 +109,6 @@ class Domain:
 def genDomain(domain_name):
     domain = Domain(domain_name)
     domain.generate_homoglyph()
-
-    # print(len(domain.homoglyph_versions),
-    #       "unique homoglyph versions generated.")
 
     top_homoglyphs = domain.get_top_homoglyphs(n=10)
     return top_homoglyphs
