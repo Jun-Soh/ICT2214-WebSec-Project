@@ -4,7 +4,7 @@ from vt_scanner import scan_url_vt, process_results, retrieve_vt_score
 from urlscanio_scanner import submit_url_scan, get_scan_results, analyze_results
 from whois_info import query_whois, check_a_records
 from payload_analysis import payload_scan
-import time
+import time, datetime
 
 
 def main():
@@ -12,10 +12,12 @@ def main():
 
     domainsTable, domainsGenerated = genDomainTable(domainName)
 
+    date_timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S %Z")
+
     htmlBody = f"""<body class="p-3 mb-2 bg-dark text-white">
                         <nav class="navbar  bg-body-tertiary-dark">
                             <div class="container-fluid">
-                                <h1>MyLittlePuny - Homoglyph domain scan report for: {domainName}</h1>
+                                <h1>MyLittlePuny - Homoglyph domain scan report for: {domainName} at {date_timestamp}</h1>
                             </div>
                         </nav>
                         
@@ -66,7 +68,7 @@ def main():
                             <hr>
                             """
 
-    write_output(domainName, htmlBody)
+    write_output(domainName, htmlBody, date_timestamp)
 
 
 def getDomainName():
@@ -123,6 +125,11 @@ def genWhoisTable(domainName):
                         <tr>
                             <th>Creation Date</th>
                             <th>Expiration Date</th>
+                            <th>Registrant</th>
+                            <th>Registrar</th>
+                            <th>Contact Email</th>
+                            <th>Country</th>
+                            <th>City</th>
                         </tr>"""
 
     whois_info = query_whois(domainName)
@@ -137,6 +144,11 @@ def genWhoisTable(domainName):
         whoisHTML += f"""<tr>
                             <td>{creation_date_utc}</td>
                             <td>{expiration_date_utc}</td>
+                            <td>{whois_info.registrant}</td>
+                            <td>{whois_info.registrar}</td>
+                            <td>{whois_info.emails}</td>
+                            <td>{whois_info.country}</td>
+                            <td>{whois_info.city}</td>
                         </tr>"""
     else:
         whoisHTML = f"""<h2>Whois information for {domainName}</h2>
@@ -272,8 +284,8 @@ def genURLScanIOTable(domainName):
     return ipdbHTML
 
 
-def write_output(domainName, htmlBody):
-    output_file = f"{domainName}_ScanReport.html"
+def write_output(domainName, htmlBody, date_timestamp):
+    output_file = f"{domainName}_{date_timestamp}_ScanReport.html"
 
     htmlHeader = """
                 <!DOCTYPE html>
